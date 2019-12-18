@@ -18,6 +18,7 @@ using Serilog;
 using Swashbuckle.AspNetCore.Swagger;
 using W4k.AspNetCore.Correlator;
 using W4k.AspNetCore.Correlator.Extensions;
+using DocIt.Common.Redis;
 
 namespace DocIt
 {
@@ -150,6 +151,12 @@ namespace DocIt
             // AWS Service Clients
             services.AddAWSService<IAmazonS3>();
             services.AddAWSService<IAmazonDynamoDB>();
+
+            // Redis
+            services.Configure<RedisConfig>(
+                Configuration.GetSection("Redis"));
+
+            services.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
 
             // Sample Developer Usage
             // My Products

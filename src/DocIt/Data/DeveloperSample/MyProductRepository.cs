@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 using DocIt.Configurations.DeveloperSample;
 using DocIt.Data.WebServices;
 using DocIt.Models.DeveloperSample;
+using DocIt.Common.Redis;
+using StackExchange.Redis;
 
 namespace DocIt.Data.DeveloperSample
 {
@@ -42,10 +44,17 @@ namespace DocIt.Data.DeveloperSample
 
         private ServiceDependenciesConfig ServiceDependenciesConfig { get; set; }
 
-        public MyProductRepository(HttpClient httpClient, IOptions<ServiceDependenciesConfig> serviceDependenciesConfig)
+        private IDatabase RedisDatabase { get; set; }
+
+        public MyProductRepository(
+            HttpClient httpClient,
+            IOptions<ServiceDependenciesConfig> serviceDependenciesConfig,
+            IRedisConnectionFactory redisConnectionFactory)
             : base(httpClient)
         {
             ServiceDependenciesConfig = serviceDependenciesConfig.Value;
+
+            RedisDatabase = redisConnectionFactory.Connection().GetDatabase();
         }
 
         public async Task<MyProduct> CreateAsync(MyProduct objectToCreate)
@@ -66,6 +75,9 @@ namespace DocIt.Data.DeveloperSample
 
         public async Task<IEnumerable<MyProduct>> GetAllAsync()
         {
+            // Test Redis Code
+            await RedisDatabase.StringIncrementAsync("GetAll - Count", 1);
+
             return await Task.FromResult(AllMyProducts);
         }
 
